@@ -14,7 +14,7 @@ import (
 	prose "gopkg.in/jdkato/prose.v2"
 )
 
-//--
+//-- DATA: LOAD AND SPLIT
 
 type labeledEntities struct {
 	Text   string
@@ -77,7 +77,7 @@ func splitEntities(entities []prose.EntityContext, trainSplit float64) ([]prose.
 	return train, test
 }
 
-//--
+//-- MODEL: TRAIN AND TEST
 
 func createModel(name string, train []prose.EntityContext) *prose.Model {
 	model := prose.ModelFromData(name, prose.UsingEntities(train))
@@ -123,6 +123,8 @@ func testModel(model *prose.Model, test []prose.EntityContext) {
 	fmt.Println("Test Model ( n =", n, ", correct =", correct, ", % =", (correct / float64(n)), ")")
 }
 
+//-- ENTITY RECOGNITION
+
 func recognizeEntity(text string, model *prose.Model) {
 	doc, err := prose.NewDocument(text, prose.WithSegmentation(false), prose.UsingModel(model))
 	if err != nil {
@@ -139,7 +141,7 @@ func recognizeEntity(text string, model *prose.Model) {
 	}
 }
 
-//--
+//-- BOOT
 
 func main() {
 	shouldTrainModel := flag.Bool("train", false, "Should train model or load from disk")

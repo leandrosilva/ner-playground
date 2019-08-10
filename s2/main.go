@@ -129,12 +129,11 @@ func recognizeEntity(text string, model *prose.Model) {
 		panic(err)
 	}
 
+	fmt.Println("Recognizing entity...\n>", text)
 	if len(doc.Entities()) == 0 {
-		fmt.Println("No named entity was recognized in:", text)
+		fmt.Println("( No named entity was recognized. )")
 	} else {
 		for _, entity := range doc.Entities() {
-			fmt.Println("Recognizing entity...")
-			fmt.Println(">", text)
 			fmt.Println("( POS Tag:", entity.Text, ", IOB Label:", entity.Label, ")")
 		}
 	}
@@ -170,4 +169,6 @@ func main() {
 
 	recognizeEntity("Well, Windows 10 is not a Mac OSX or Linux but it is not that bad.", model)
 	recognizeEntity("Who in the freakin' Earth would use Bing instead of Google?", model)
+	recognizeEntity("Look, guy let his iPhone just there.", model)
+	recognizeEntity("Would it that whole pizza, bro.", model)
 }

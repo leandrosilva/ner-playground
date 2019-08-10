@@ -125,18 +125,46 @@ func testModel(model *prose.Model, test []prose.EntityContext) {
 
 //-- ENTITY RECOGNITION
 
-func recognizeEntity(text string, model *prose.Model) {
+type entityCount struct {
+	Entity prose.Entity
+	Count  int
+}
+
+func distinctEntities(entities []prose.Entity) []entityCount {
+	counter := map[string]entityCount{}
+	for _, entity := range entities {
+		value, found := counter[entity.Text]
+		if found {
+			value.Count = value.Count + 1
+			counter[entity.Text] = value
+		} else {
+			counter[entity.Text] = entityCount{Entity: entity, Count: 1}
+		}
+	}
+
+	distinct := []entityCount{}
+	for _, value := range counter {
+		distinct = append(distinct, value)
+	}
+
+	return distinct
+}
+
+func recognizeEntity(text string, model *prose.Model, printText bool) {
 	doc, err := prose.NewDocument(text, prose.WithSegmentation(false), prose.UsingModel(model))
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("Recognizing entity...\n>", text)
+	fmt.Println("Recognizing entity...")
+	if printText {
+		fmt.Println(">", text)
+	}
 	if len(doc.Entities()) == 0 {
 		fmt.Println("( No named entity was recognized. )")
 	} else {
-		for _, entity := range doc.Entities() {
-			fmt.Println("( POS Tag:", entity.Text, ", IOB Label:", entity.Label, ")")
+		for _, ec := range distinctEntities(doc.Entities()) {
+			fmt.Println("( POS Tag:", ec.Entity.Text, ", IOB Label:", ec.Entity.Label, ", Count:", ec.Count, ")")
 		}
 	}
 }
@@ -169,8 +197,9 @@ func main() {
 
 	testModel(model, test)
 
-	recognizeEntity("Well, Windows 10 is not a Mac OSX or Linux but it is not that bad.", model)
-	recognizeEntity("Who in the freakin' Earth would use Bing instead of Google?", model)
-	recognizeEntity("Look, guy let his iPhone just there.", model)
-	recognizeEntity("Would it that whole pizza, bro.", model)
+	recognizeEntity("Well, Windows 10 is not a Mac OSX or Linux but it is not that bad.", model, true)
+	recognizeEntity("Who in the freakin' Earth would use Bing instead of Google?", model, true)
+	recognizeEntity("Look, guy let his iPhone just there.", model, true)
+	recognizeEntity("Would it that whole pizza, bro.", model, true)
+	recognizeEntity(string(readFile("big_text.txt")), model, false)
 }

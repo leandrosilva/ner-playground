@@ -34,20 +34,20 @@ func uploadFile(w http.ResponseWriter, r *http.Request) (string, error) {
 	// FormFile returns the first file for the given key `dataset`,
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
-	file, handler, err := r.FormFile("dataset")
+	file, meta, err := r.FormFile("dataset")
 	if err != nil {
 		return "", err
 	}
 	defer file.Close()
 
-	log.Printf("Uploaded File: %+v\n", handler.Filename)
-	log.Printf("File Size: %+v\n", handler.Size)
-	log.Printf("MIME Header: %+v\n", handler.Header)
+	log.Printf("Uploaded File: %+v\n", meta.Filename)
+	log.Printf("File Size: %+v\n", meta.Size)
+	log.Printf("MIME Header: %+v\n", meta.Header)
 
 	// Create a temporary file within our temp directory that follows
 	// a particular naming pattern
-	os.MkdirAll(filepath.Join(".", "temp"), os.ModePerm)
-	tempFile, err := ioutil.TempFile("temp", "train-dataset.jsonl")
+	os.MkdirAll(filepath.Join(".", "datasets"), os.ModePerm)
+	tempFile, err := ioutil.TempFile("datasets", "dataset-train-"+meta.Filename)
 	if err != nil {
 		log.Println("Cannot create temp file:", err)
 		return "", err
@@ -69,7 +69,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) (string, error) {
 	}
 
 	// Get file's name and get out
-	fileName := tempFile.Name()
+	fileName := filepath.Base(tempFile.Name())
 
 	return fileName, nil
 }
